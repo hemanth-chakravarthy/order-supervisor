@@ -93,6 +93,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Order Supervisor API", version="1.0", lifespan=lifespan)
 
+# CORS Middleware config
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,  # Must be False if allow_origins is ["*"]
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Temporal Client Cache
 temporal_client_cache = None
 
