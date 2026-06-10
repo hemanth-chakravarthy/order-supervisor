@@ -1,0 +1,48 @@
+services:
+  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  - type: web
+    name: order-supervisor-api
+    runtime: python
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # Neon connection string
+      - key: TEMPORAL_HOST
+        sync: false          # e.g. order-supervisor.hyehy.tmprl.cloud:7233
+      - key: TEMPORAL_NAMESPACE
+        sync: false          # e.g. order-supervisor.hyehy
+      - key: TEMPORAL_API_KEY
+        sync: false          # Temporal Cloud API key
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: PYTHON_VERSION
+        value: "3.11"
+
+  # ── Temporal Worker ──────────────────────────────────────────────────────────
+  - type: worker
+    name: order-supervisor-worker
+    runtime: python
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m backend.workflows.worker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: TEMPORAL_HOST
+        sync: false
+      - key: TEMPORAL_NAMESPACE
+        sync: false
+      - key: TEMPORAL_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: PYTHON_VERSION
+        value: "3.11"

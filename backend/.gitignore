@@ -1,0 +1,45 @@
+# ── Python Bytecode ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ── Virtual Environment ───────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+.Python
+
+# ── Packaging & Distribution ──────────────────────────────────────────────────
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+sdist/
+wheels/
+pip-wheel-metadata/
+MANIFEST
+
+# ── Testing & Coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+nosetests.xml
+
+# ── Type Checking ─────────────────────────────────────────────────────────────
+.mypy_cache/
+.pytype/
+
+# ── Temporal (local dev server state) ────────────────────────────────────────
+temporal-data/
+.temporal/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+pip-log.txt
+pip-debug.log

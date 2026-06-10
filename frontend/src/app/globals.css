@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light background palette */
+  --color-bg-page:    #f4f5f7;
+  --color-bg-card:    #ffffff;
+  --color-bg-panel:   #fafafa;
+  --color-bg-input:   #f7f8fa;
+  --color-border:     #e2e5ea;
+  --color-border-active: #1a1a1a;
+
+  /* Text */
+  --color-text-primary:  #0d0d0d;
+  --color-text-secondary:#4b5563;
+  --color-text-muted:    #9ca3af;
+
+  /* Brand Accents (unchanged – work on white too) */
+  --color-accent-green:  #4ade80;
+  --color-accent-green-dark: #16a34a;
+  --color-accent-cyan:   #22d3ee;
+  --color-accent-purple: #a78bfa;
+  --color-accent-yellow: #facc15;
+  --color-accent-red:    #ef4444;
+
+  /* Sidebar accent */
+  --color-sidebar-bg:    #0d0d0d;
+  --color-sidebar-text:  #e5e7eb;
+  --color-sidebar-muted: #6b7280;
+  --color-sidebar-accent:#4ade80;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-page);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monospace Helpers */
+.font-mono-dev {
+  font-family: 'JetBrains Mono', 'Azeret Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Subtle grid pattern for main content area */
+.tb-grid {
+  background-size: 28px 28px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+  background-color: var(--color-bg-page);
+}
+
+/* Accent glow shadows */
+.shadow-accent-green {
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.25), 0 4px 16px rgba(74, 222, 128, 0.12);
+}
+.shadow-accent-cyan {
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), 0 4px 16px rgba(34, 211, 238, 0.12);
+}
+
+/* Card elevation */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+}
+.card:hover {
+  border-color: #c9cdd4;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f1f3;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5c9d0;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Status badge helpers */
+.badge-running  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-sleeping { background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+.badge-paused   { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+.badge-done     { background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; }
+
+/* Form inputs */
+input, select, textarea {
+  font-family: 'JetBrains Mono', monospace;
+}
