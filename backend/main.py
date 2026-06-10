@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 # Load env variables from .env file
 load_dotenv()
 
+import asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
@@ -18,22 +20,78 @@ from backend.schemas import (
     RunDetailResponse, EventInject, InstructionCreate, ActivityResponse, MemorySnapshotResponse, FinalReportResponse
 )
 
-# Temporal client with optional Cloud API Key support
+# Temporal
 from temporalio.client import Client
-
-app = FastAPI(title="Order Supervisor API", version="1.0")
-
-# Enable CORS for Next.js
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+from temporalio.worker import Worker
+from backend.workflows.workflows import OrderSupervisorWorkflow
+from backend.workflows.activities import (
+    run_agent_activity,
+    execute_action_activity,
+    update_memory_activity,
+    generate_summary_activity,
+    update_run_state
 )
 
-# Auto-create tables on startup
-Base.metadata.create_all(bind=engine)
+# ── Temporal connection helpers ───────────────────────────────────────────────
+
+def _build_connect_kwargs(namespace: str) -> dict:
+    api_key = os.getenv("TEMPORAL_API_KEY", "").strip()
+    if api_key:
+        return {"namespace": namespace, "tls": True, "api_key": api_key}
+    return {"namespace": namespace, "tls": False}
+
+
+async def _start_temporal_worker(client: Client):
+    """Run the Temporal worker in the background (called from lifespan)."""
+    worker = Worker(
+        client,
+        task_queue="order-supervisor",
+        workflows=[OrderSupervisorWorkflow],
+        activities=[
+            run_agent_activity,
+            execute_action_activity,
+            update_memory_activity,
+            generate_summary_activity,
+            update_run_state,
+        ],
+    )
+    print("Temporal Worker started inside API process.")
+    await worker.run()
+
+
+# ── App lifespan (startup / shutdown) ────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create DB tables
+    Base.metadata.create_all(bind=engine)
+
+    # Connect to Temporal and start worker in background
+    worker_task = None
+    temporal_host      = os.getenv("TEMPORAL_HOST", "localhost:7233")
+    temporal_namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
+    try:
+        client = await Client.connect(temporal_host, **_build_connect_kwargs(temporal_namespace))
+        global temporal_client_cache
+        temporal_client_cache = client
+        worker_task = asyncio.create_task(_start_temporal_worker(client))
+        print(f"Connected to Temporal at {temporal_host}")
+    except Exception as e:
+        print(f"Warning: Temporal unavailable ({e}). Running in fallback mode.")
+
+    yield  # app is running
+
+    # Shutdown: cancel the worker task gracefully
+    if worker_task and not worker_task.done():
+        worker_task.cancel()
+        try:
+            await worker_task
+        except asyncio.CancelledError:
+            pass
+    print("Temporal worker shut down.")
+
+
+app = FastAPI(title="Order Supervisor API", version="1.0", lifespan=lifespan)
 
 # Temporal Client Cache
 temporal_client_cache = None
