@@ -96,22 +96,12 @@ app = FastAPI(title="Order Supervisor API", version="1.0", lifespan=lifespan)
 # Temporal Client Cache
 temporal_client_cache = None
 
-def _build_connect_kwargs(host: str, namespace: str) -> dict:
-    """Build Client.connect() kwargs.
-    - With TEMPORAL_API_KEY:  Temporal Cloud (TLS + API key)
-    - Without:                Local server (no TLS, no key)
-    """
-    api_key = os.getenv("TEMPORAL_API_KEY", "").strip()
-    if api_key:
-        return {"namespace": namespace, "tls": True, "api_key": api_key}
-    return {"namespace": namespace, "tls": False}
-
 async def get_temporal_client():
     global temporal_client_cache
     if temporal_client_cache is None:
         temporal_host      = os.getenv("TEMPORAL_HOST", "localhost:7233")
         temporal_namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
-        kwargs             = _build_connect_kwargs(temporal_host, temporal_namespace)
+        kwargs             = _build_connect_kwargs(temporal_namespace)
         try:
             temporal_client_cache = await Client.connect(temporal_host, **kwargs)
         except Exception as e:
